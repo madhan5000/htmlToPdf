@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const puppeteer = require('puppeteer');
 const contentDisposition = require('content-disposition');
+const URL = require('url');
 
 app.get('/pdf', function (req, res) {
 	(async()=>{
@@ -10,10 +11,13 @@ app.get('/pdf', function (req, res) {
 		if (!url) {
     	return res.status(400).send('url parameter needed');
   	}
+		let filename = (URL.parse(req.query.url)).host.replace(/\./g, '_');
+		console.log(filename);
+
 		const browser = await puppeteer.launch();
 		const page = await browser.newPage();
 		await page.goto(req.query.url, {waitUntil: 'networkidle0'});
-		
+
 		let height = await page.evaluate(() => document.documentElement.offsetHeight);
 		await page.emulateMedia('screen');
 		let pdf = await page.pdf({
